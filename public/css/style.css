@@ -1,0 +1,9 @@
+body {
+    background: linear-gradient(to bottom, #1b2838 0%, #171a21 100%);
+    color: #c7d5e0;
+    font-family: 'Motiva Sans', Sans-serif;
+}
+.game-card:hover {
+    background-color: #2a475e;
+    cursor: pointer;
+}

@@ -18,9 +18,11 @@
   "homepage": "https://github.com/1981programmer/digital-imagination#readme",
   "description": "",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.3.1",
     "ejs": "^5.0.1",
     "express": "^5.2.1",
+    "express-session": "^1.19.0",
     "mysql2": "^3.20.0"
   }
 }
