@@ -3,6 +3,7 @@ const app = express();
 const path = require('path');
 const session = require('express-session');
 const bcrypt = require('bcrypt');
+const db = require('./config/db');
 
 // The Password Requirement Pattern (RegEx)
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -70,9 +71,17 @@ app.set('views', path.join(__dirname, 'views'));
 // Serve static files (like CSS or Images) from the public folder
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', (req, res) => {
-    // For now render the file. Later will pass DB data here.
-    res.render('index');
+app.get('/', async (req, res) => {
+    try {
+        // 1. Query the RDS database for all 50+ games
+        const [games] = await db.query('SELECT * FROM games');
+        
+        // 2. Pass those games to your index.ejs file
+        res.render('index', { games: games });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Database Error: Could not fetch games from AWS.");
+    }
 });
 
 const PORT = process.env.PORT || 3000;

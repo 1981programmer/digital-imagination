@@ -20,15 +20,25 @@
     </style>
 </head>
 <body>
+    <nav style="background: #171a21; padding: 15px; display: flex; gap: 20px;">
+        <a href="/" style="color: white; text-decoration: none;">STORE</a>
+        <a href="/library" style="color: white; text-decoration: none;">LIBRARY</a>
+        <a href="/login" style="color: white; text-decoration: none;">LOGIN</a>
+    </nav>
     <div class="container">
         <h1>Digital Imagination Store</h1>
         <hr>
-        <div class="game-card">
-            <div>
-                <h3>Featured Game: Neon Samurai</h3>
-                <p>High-speed combat in a cyberpunk Kyoto.</p>
-            </div>
-            <div class="price">$49.99</div>
+        <div class="game-list">
+            <% games.forEach(game => { %>
+                <div class="game-card">
+                    <div>
+                        <h3><%= game.title %></h3>
+                        <p><%= game.description %></p>
+                        <small>Category: <%= game.category %></small>
+                    </div>
+                    <div class="price">$<%= game.price %></div>
+                </div>
+            <% }); %>
         </div>
     </div>
 </body>
