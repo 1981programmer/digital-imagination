@@ -261,17 +261,6 @@ app.post('/review/submit', isAuthenticated, async (req, res) => {
     }
 });
 
-// --- DEBUG & START ---
-
-app.get('/debug-db', async (req, res) => {
-    try {
-        const [tables] = await db.query('SELECT * FROM reviews');
-        res.json(tables);
-    } catch (err) {
-        res.status(500).send("Could not list tables: " + err.message);
-    }
-});
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`DI Server is running on http://localhost:${PORT}`);
