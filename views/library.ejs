@@ -13,23 +13,25 @@
     </style>
 </head>
 <body>
-    <nav style="background: #171a21; padding: 15px; display: flex; gap: 20px;">
-        <a href="/" style="color: white; text-decoration: none;">STORE</a>
-        <a href="/library" style="color: white; text-decoration: none;">LIBRARY</a>
-        <a href="/login" style="color: white; text-decoration: none;">LOGIN</a>
-    </nav>
+    <%- include('partials/navbar') %>
     <div class="container">
         <h1>Your Game Library</h1>
-        <p>Welcome back, User!</p>
-        <a href="/logout" style="color: #c2c2c2;">Logout</a>
+        <h2>Welcome back, <%= username %>!</h2>
         <hr>
         <div class="game-grid">
-            <div class="game-item">
-                <h3>Cyber-Nexus 2077</h3>
-                <br>
-                <a href="#" class="btn-play">PLAY</a>
-            </div>
-            </div>
+            <% if (games.length === 0) { %>
+                <p>Your library is empty. Head to the <a href="/" style="color: #66c0f4;">Store</a> to add some games!</p>
+            <% } else { %>
+                <% games.forEach(game => { %>
+                    <div class="game-item">
+                        <h3><%= game.title %></h3>
+                        <br>
+                        <a href="#" class="btn-play">PLAY</a>
+                        <a href="/review/write/<%= game.game_id %>" class="btn-play" style="background: #4c6c8c;">GIVE REVIEW</a>
+                    </div>
+                <% }); %>
+            <% } %>
+        </div>
     </div>
 </body>
 </html>

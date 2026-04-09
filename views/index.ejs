@@ -17,15 +17,17 @@
             justify-content: space-between;
         }
         .price { color: #66c0f4; font-weight: bold; }
+        .cart-link { float: right; color: #66c0f4; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
-    <nav style="background: #171a21; padding: 15px; display: flex; gap: 20px;">
-        <a href="/" style="color: white; text-decoration: none;">STORE</a>
-        <a href="/library" style="color: white; text-decoration: none;">LIBRARY</a>
-        <a href="/login" style="color: white; text-decoration: none;">LOGIN</a>
-    </nav>
+    <%- include('partials/navbar') %>
     <div class="container">
+        <% if (typeof added !== 'undefined') { %>
+            <div style="background: #47b230; color: white; padding: 10px; margin-bottom: 20px; border-radius: 3px;">
+                ✔ <%= added %> added to your cart!
+            </div>
+        <% } %>
         <h1>Digital Imagination Store</h1>
         <hr>
         <div class="game-list">
@@ -34,7 +36,18 @@
                     <div>
                         <h3><%= game.title %></h3>
                         <p><%= game.description %></p>
+                        <p>$<%= game.price %></p>
                         <small>Category: <%= game.category %></small>
+                        
+                        <% if (game.library_id) { %>
+                            <button class="btn-in-library" disabled>IN LIBRARY</button>
+                        <% } else { %>
+                            <form action="/cart/add" method="POST">
+                                <input type="hidden" name="gameId" value="<%= game.game_id %>">
+                                <input type="hidden" name="gameTitle" value="<%= game.title %>">
+                                <button type="submit" class="btn-buy">Add to Cart</button>
+                            </form>
+                        <% } %>
                     </div>
                     <div class="price">$<%= game.price %></div>
                 </div>

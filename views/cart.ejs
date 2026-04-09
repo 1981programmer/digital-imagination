@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DI | Shopping Cart</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body { background-color: #1b2838; color: white; font-family: sans-serif; }
+        .container { width: 80%; margin: 50px auto; background: #16202d; padding: 30px; border-radius: 5px; }
+        .cart-list { list-style: none; padding: 0; }
+        .cart-item { 
+            background: #1b2838; 
+            margin: 10px 0; 
+            padding: 15px; 
+            border-radius: 3px; 
+            display: flex; 
+            justify-content: space-between;
+            align-items: center;
+        }
+        hr { border: 0; height: 1px; background: #2a475e; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="container">
+        <h1><%= user %>'s Shopping Cart</h1>
+        <hr>
+
+        <% if (cart.length === 0) { %>
+            <p>Your cart is empty. <a href="/" style="color: #66c0f4;">Go back to the store</a>.</p>
+        <% } else { %>
+            <div class="cart-list">
+                <% cart.forEach(item => { %>
+                    <div class="cart-item">
+                        <span><%= item.title %></span>
+                        
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <span style="color: #66c0f4;">Ready for Checkout</span>
+                            
+                            <a href="/cart/remove/<%= item.id %>" class="btn-remove">Delete From Cart</a>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+
+            <hr>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <a href="/" style="color: #c7d5e0; text-decoration: none;">← Continue Shopping</a>
+                
+                <form action="/checkout" method="POST">
+                    <button type="submit" class="btn-buy">Purchase All Items</button>
+                </form>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<%- include('partials/navbar') %>
+<div class="container" style="max-width: 600px; margin-top: 50px;">
+    <h1>Write a Review</h1>
+    <p>Sharing your thoughts on <strong><%= game.title %></strong></p>
+    <hr>
+
+    <form action="/review/submit" method="POST">
+        <input type="hidden" name="gameId" value="<%= game.game_id %>">
+
+        <label for="rating">Rating:</label><br>
+        <select name="rating" id="rating" required style="width: 100%; padding: 10px; margin-bottom: 20px; background: #2a475e; color: white;">
+            <option value="0">0 - Worst Game I Ever Played</option>
+            <option value="1">1 - Was a Really Awful Game</option>
+            <option value="2">2 - Was a Pretty Bad Game</option>
+            <option value="3">3 - Was an OK Game</option>
+            <option value="4">4 - Was a Good Game</option>
+            <option value="5">5 - Was a Fantastic Game</option>
+            <option value="6">6 - Was One of the Best Games I Have Ever Played</option>
+        </select>
+
+        <label for="comment">What did you think?</label><br>
+        <textarea name="comment" id="comment" rows="6" required placeholder="Likes, dislikes, gameplay thoughts..." 
+                  style="width: 100%; padding: 10px; background: #2a475e; color: white; border: none;"></textarea>
+
+        <br><br>
+        <button type="submit" class="btn-buy" style="width: 100%;">Submit Review</button>
+        <p style="text-align: center; margin-top: 15px;">
+            <a href="/library" style="color: #66c0f4; text-decoration: none;">← Back to Library</a>
+        </p>
+    </form>
+</div>

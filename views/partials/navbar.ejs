@@ -1,0 +1,21 @@
+<nav style="background: #171a21; padding: 15px; display: flex; gap: 20px; align-items: center;">
+    <a href="/" style="color: white; text-decoration: none;">STORE</a>
+    <a href="/library" style="color: white; text-decoration: none;">LIBRARY</a>
+    <a href="/community" style="color: white; text-decoration: none;">COMMUNITY</a>
+    
+    <div style="margin-left: auto; display: flex; gap: 20px; align-items: center;">
+        <% if (cart && cart.length > 0) { %>
+            <a href="/cart" style="color: #66c0f4; text-decoration: none;">
+                🛒 VIEW CART (<%= cart.length %>)
+            </a>
+        <% } %>
+
+        <% if (user) { %>
+            <span style="color: #c7d5e0;">Welcome, <%= user %>!</span>
+            <a href="/logout" style="color: #c7d5e0; text-decoration: none;">LOGOUT</a>
+        <% } else { %>
+            <a href="/login" style="color: white; text-decoration: none;">LOGIN</a>
+            <a href="/register" style="color: white; text-decoration: none;">REGISTER</a>
+        <% } %>
+    </div>
+</nav>
