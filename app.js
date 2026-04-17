@@ -81,9 +81,18 @@ app.get('/logout', (req, res) => {
 
 // --- STORE & LIBRARY ROUTES ---
 
-app.get('/', async (req, res) => {
-    const currentUser = req.session.user || ''; // Use empty string if not logged in
-    const added = req.query.added; // This line "grabs" the game name from the URL
+// --- NEW HOME PAGE ROUTE ---
+app.get('/', (req, res) => {
+    res.render('home', { 
+        user: req.session.user, 
+        cart: req.session.cart 
+    });
+});
+
+// --- UPDATED STORE ROUTE (Moved to /store) ---
+app.get('/store', async (req, res) => {
+    const currentUser = req.session.user || ''; 
+    const added = req.query.added; 
 
     const query = `
         SELECT games.*, user_libraries.library_id
@@ -94,11 +103,11 @@ app.get('/', async (req, res) => {
     
     try {
         const [games] = await db.query(query, [currentUser]);
-        // Pass all session info to the template
         res.render('index', { 
             games: games, 
             user: req.session.user, 
-            cart: req.session.cart 
+            cart: req.session.cart,
+            added: added
         });
     } catch (err) {
         res.status(500).send("Error fetching games.");
@@ -107,15 +116,24 @@ app.get('/', async (req, res) => {
 
 app.get('/library', isAuthenticated, async (req, res) => {
     const username = req.session.user;
+    const message = req.query.message; // Capture the "ReviewSubmitted" message
     try {
         const query = `
-            SELECT games.* FROM games
+            SELECT games.*, reviews.review_id 
+            FROM games
             JOIN user_libraries ON games.game_id = user_libraries.game_id
             JOIN users ON user_libraries.user_id = users.user_id
+            LEFT JOIN reviews ON games.game_id = reviews.game_id AND users.user_id = reviews.user_id
             WHERE users.username = ?
         `;
         const [userGames] = await db.query(query, [username]);
-        res.render('library', { username: username, games: userGames, user: req.session.user, cart: req.session.cart });
+        res.render('library', { 
+            username: username, 
+            games: userGames, 
+            user: req.session.user, 
+            cart: req.session.cart,
+            message: message // Pass the message to the EJS template
+        });
     } catch (err) {
         res.status(500).send("Could not load your library.");
     }
@@ -137,7 +155,7 @@ app.post('/cart/add', (req, res) => {
         req.session.cart.push({ id: gameId, title: gameTitle });
     }
 
-    res.redirect('/?added=' + encodeURIComponent(gameTitle));
+    res.redirect('/store?added=' + encodeURIComponent(gameTitle));
 });
 
 // 2. Render the Cart page
@@ -234,27 +252,25 @@ app.post('/review/submit', isAuthenticated, async (req, res) => {
         const [userResult] = await db.query('SELECT user_id FROM users WHERE username = ?', [username]);
         const userId = userResult[0].user_id;
 
-        // NEW: Check if this user has already reviewed this specific game
         const [existing] = await db.query(
             'SELECT * FROM reviews WHERE user_id = ? AND game_id = ?', 
             [userId, gameId]
         );
 
         if (existing.length > 0) {
-            // If it exists, UPDATE the review instead of inserting a new one
             await db.query(
                 'UPDATE reviews SET rating = ?, comment = ? WHERE user_id = ? AND game_id = ?',
                 [rating, comment, userId, gameId]
             );
         } else {
-            // Otherwise, insert the new review
             await db.query(
                 'INSERT INTO reviews (user_id, game_id, rating, comment) VALUES (?, ?, ?, ?)',
                 [userId, gameId, rating, comment]
             );
         }
 
-        res.redirect('/community');
+        // REDIRECT back to library with a "message" parameter in the URL
+        res.redirect('/library?message=ReviewSubmitted');
     } catch (err) {
         console.error(err);
         res.status(500).send("Could not save review.");

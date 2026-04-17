@@ -17,6 +17,13 @@
     <div class="container">
         <h1>Your Game Library</h1>
         <h2>Welcome back, <%= username %>!</h2>
+
+        <% if (typeof message !== 'undefined' && message === 'ReviewSubmitted') { %>
+            <div style="background: #47b230; color: white; padding: 15px; margin: 20px 0; border-radius: 5px; text-align: center; font-weight: bold;">
+                ✔ Review Submitted Successfully!
+            </div>
+        <% } %>
+
         <hr>
         <div class="game-grid">
             <% if (games.length === 0) { %>
@@ -27,7 +34,12 @@
                         <h3><%= game.title %></h3>
                         <br>
                         <a href="#" class="btn-play">PLAY</a>
-                        <a href="/review/write/<%= game.game_id %>" class="btn-play" style="background: #4c6c8c;">GIVE REVIEW</a>
+                        
+                        <% if (!game.review_id) { %>
+                            <a href="/review/write/<%= game.game_id %>" class="btn-play" style="background: #4c6c8c;">GIVE REVIEW</a>
+                        <% } else { %>
+                            <p style="color: #47b230; margin-top: 10px; font-size: 0.9em;">✔ Reviewed</p>
+                        <% } %>
                     </div>
                 <% }); %>
             <% } %>

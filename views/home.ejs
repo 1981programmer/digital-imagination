@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Imagination | Home</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body { background-color: #1b2838; color: white; font-family: sans-serif; }
+        
+        .hero-section {
+            background: linear-gradient(rgba(23, 26, 33, 0.85), rgba(23, 26, 33, 0.85));
+            padding: 120px 20px;
+            text-align: center;
+            border-bottom: 3px solid #66c0f4;
+        }
+
+        .logo-main {
+            font-size: 100px;
+            margin-bottom: 20px;
+            display: inline-block;
+            filter: drop-shadow(0 0 15px #66c0f4);
+        }
+
+        .cta-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 60px;
+            flex-wrap: wrap;
+        }
+
+        .cta-card {
+            background: #16202d;
+            padding: 40px;
+            border-radius: 8px;
+            width: 320px;
+            transition: transform 0.3s, border-color 0.3s;
+            border: 1px solid #2a475e;
+            text-align: center;
+        }
+
+        .cta-card:hover {
+            transform: translateY(-10px);
+            border-color: #66c0f4;
+        }
+
+        .footer-credit {
+            margin-top: 100px;
+            color: #8f98a0;
+            font-size: 1em;
+            text-align: center;
+            border-top: 1px solid #2a475e;
+            padding: 30px;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <div class="hero-section">
+        <div class="logo-main">🚀</div> 
+        <h1 style="font-size: 3.8em; margin-bottom: 15px;">Welcome to the Digital Imagination Website</h1>
+        <p style="font-size: 1.6em; color: #66c0f4;">The best place to play video games on Earth</p>
+        
+        <div class="cta-container">
+            <div class="cta-card">
+                <h3 style="font-size: 1.8em;">The Store</h3>
+                <p style="color: #c7d5e0;">Checkout all our awesome games in the Store and add them to your collection.</p>
+                <br>
+                <a href="/store" class="btn-buy" style="text-decoration: none; display: block; padding: 15px;">Enter Store</a>
+            </div>
+
+            <div class="cta-card">
+                <h3 style="font-size: 1.8em;">Community</h3>
+                <p style="color: #c7d5e0;">Discuss games and things happening on our Community page.</p>
+                <br>
+                <a href="/community" class="btn-buy" style="text-decoration: none; display: block; padding: 15px; background: #4c6c8c;">Visit Community</a>
+            </div>
+        </div>
+
+        <div class="footer-credit">
+            <p>Developed by <strong>Gregory Treinen</strong> for CSCI 4650</p>
+        </div>
+    </div>
+</body>
+</html>

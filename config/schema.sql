@@ -36,7 +36,7 @@ CREATE TABLE reviews (
     review_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     game_id INT,
-    rating INT CHECK (rating BETWEEN 1 AND 5),
+    rating INT NOT NULL CHECK (rating >= 0 AND rating <= 6),
     comment TEXT,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (game_id) REFERENCES games(game_id)
