@@ -32,24 +32,46 @@
         <hr>
         <div class="game-list">
             <% games.forEach(game => { %>
-                <div class="game-card">
-                    <div>
+                <div class="game-card" style="align-items: center;">
+                    <div style="flex: 0 0 150px; margin-right: 20px;">
+                        <img src="<%= game.image_url %>" alt="<%= game.title %>" 
+                            style="width: 100%; border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
+                    </div>
+
+                    <div style="flex-grow: 1;">
                         <h3><%= game.title %></h3>
                         <p><%= game.description %></p>
-                        <p>$<%= game.price %></p>
+                        
+                        <p>
+                            Current Review Score: 
+                            <% if (game.avg_rating) { %>
+                                <span style="color: #ffc107;"><%= Number(game.avg_rating).toFixed(1) %>/6</span>
+                            <% } else { %>
+                                <span style="color: #888;">No reviews yet</span>
+                            <% } %>
+                        </p>
+
                         <small>Category: <%= game.category %></small>
                         
-                        <% if (game.library_id) { %>
-                            <button class="btn-in-library" disabled>IN LIBRARY</button>
-                        <% } else { %>
-                            <form action="/cart/add" method="POST">
-                                <input type="hidden" name="gameId" value="<%= game.game_id %>">
-                                <input type="hidden" name="gameTitle" value="<%= game.title %>">
-                                <button type="submit" class="btn-buy">Add to Cart</button>
-                            </form>
-                        <% } %>
+                        <div style="margin-top: 10px;">
+                            <% if (game.library_id) { %>
+                                <button class="btn-in-library" disabled style="...">IN LIBRARY</button>
+                            <% } else { %>
+                                <form action="/cart/add" method="POST" style="display: inline;">
+                                    <input type="hidden" name="gameId" value="<%= game.game_id %>">
+                                    <input type="hidden" name="gameTitle" value="<%= game.title %>">
+                                    <button type="submit" class="btn-buy" style="...">Add to Cart</button>
+                                </form>
+                            <% } %>
+
+                            <div style="margin-top: 10px;">
+                                <a href="/game/<%= game.game_id %>" style="color: #66c0f4; text-decoration: none; font-size: 0.9em;">
+                                    Read Reviews
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="price">$<%= game.price %></div>
+                    <div class="price" style="font-size: 1.2em;">$<%= game.price %></div>
                 </div>
             <% }); %>
         </div>

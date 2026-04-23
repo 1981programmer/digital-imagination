@@ -94,11 +94,19 @@ app.get('/store', async (req, res) => {
     const currentUser = req.session.user || ''; 
     const added = req.query.added; 
 
+    // This query does three things: 
+    // 1. Gets all game data (including image_url)
+    // 2. Checks if the logged-in user already owns the game
+    // 3. Calculates the average community rating
     const query = `
-        SELECT games.*, user_libraries.library_id
+        SELECT games.*, 
+               user_libraries.library_id, 
+               AVG(reviews.rating) AS avg_rating
         FROM games
         LEFT JOIN users ON users.username = ?
         LEFT JOIN user_libraries ON games.game_id = user_libraries.game_id AND users.user_id = user_libraries.user_id
+        LEFT JOIN reviews ON games.game_id = reviews.game_id
+        GROUP BY games.game_id, user_libraries.library_id
     `;
     
     try {
@@ -110,6 +118,7 @@ app.get('/store', async (req, res) => {
             added: added
         });
     } catch (err) {
+        console.error("Store Error:", err);
         res.status(500).send("Error fetching games.");
     }
 });
@@ -274,6 +283,40 @@ app.post('/review/submit', isAuthenticated, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send("Could not save review.");
+    }
+});
+
+// To handle the "Read Reviews" link
+app.get('/game/:id', async (req, res) => {
+    const gameId = req.params.id;
+    
+    try {
+        // 1. Get specific game details
+        const [gameResult] = await db.query('SELECT * FROM games WHERE game_id = ?', [gameId]);
+        
+        if (gameResult.length === 0) {
+            return res.status(404).send("Game not found.");
+        }
+
+        // 2. Get all reviews for this specific game
+        const reviewsQuery = `
+            SELECT reviews.*, users.username 
+            FROM reviews 
+            JOIN users ON reviews.user_id = users.user_id 
+            WHERE reviews.game_id = ? 
+            ORDER BY created_at DESC`;
+        const [reviews] = await db.query(reviewsQuery, [gameId]);
+
+        // 3. Render the detailed view (Make sure game.ejs exists in /views)
+        res.render('game_review', { 
+            game: gameResult[0], 
+            reviews: reviews,
+            user: req.session.user,
+            cart: req.session.cart
+        });
+    } catch (err) {
+        console.error("Error loading game details:", err);
+        res.status(500).send("Database error.");
     }
 });
 

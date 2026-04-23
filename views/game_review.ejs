@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/navbar') %>
+    <title>Reviews for <%= game.title %></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body style="background-color: #1b2838; color: white;">
+    <div style="width: 80%; margin: auto; padding-top: 20px;">
+        <h1>Reviews for <%= game.title %></h1>
+        <hr>
+        <div style="display: flex; gap: 20px;">
+            <img src="<%= game.image_url %>" style="width: 200px; border-radius: 5px;">
+            <div>
+                <h3>Game Details</h3>
+                <p><%= game.description %></p>
+                <p>Category: <%= game.category %></p>
+            </div>
+        </div>
+
+        <h2 style="margin-top: 30px;">User Feedback</h2>
+        <% if (reviews.length > 0) { %>
+            <% reviews.forEach(review => { %>
+                <div style="background: #16202d; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
+                    <strong style="color: #ffc107;">Rating: <%= review.rating %>/6</strong>
+                    <p>"<%= review.comment %>"</p>
+                    <small>— <%= review.username %></small>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <p>No reviews yet for this game.</p>
+        <% } %>
+        <br>
+        <a href="/store" style="color: #66c0f4;">Back to Store</a>
+    </div>
+</body>
+</html>
