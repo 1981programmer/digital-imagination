@@ -35,7 +35,12 @@ function isAuthenticated(req, res, next) {
 
 // --- AUTHENTICATION ROUTES ---
 
-app.get('/register', (req, res) => res.render('register'));
+app.get('/register', (req, res) => {
+    res.render('register', { 
+        user: req.session.user,      // Added this to fix the ReferenceError
+        cart: req.session.cart || [] 
+    });
+});
 
 app.post('/register', async (req, res) => {
     const { username, password, email } = req.body;
@@ -55,7 +60,12 @@ app.post('/register', async (req, res) => {
     }
 });
 
-app.get('/login', (req, res) => res.render('login'));
+app.get('/login', (req, res) => {
+    res.render('login', { 
+        user: req.session.user,      // Added this for consistency
+        cart: req.session.cart || [] 
+    });
+});
 
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
@@ -64,7 +74,9 @@ app.post('/login', async (req, res) => {
         if (users.length === 0) return res.send('Invalid username or password.');
         const isMatch = await bcrypt.compare(password, users[0].password);
         if (isMatch) {
+            // FIX: Save BOTH the username and the user_id to the session
             req.session.user = users[0].username;
+            req.session.user_id = users[0].user_id; 
             res.redirect('/library');
         } else {
             res.send('Invalid username or password.');
@@ -85,7 +97,7 @@ app.get('/logout', (req, res) => {
 app.get('/', (req, res) => {
     res.render('home', { 
         user: req.session.user, 
-        cart: req.session.cart 
+        cart: req.session.cart || [] // Prevents home page navbar crashes
     });
 });
 
@@ -150,15 +162,14 @@ app.get('/library', isAuthenticated, async (req, res) => {
 
 // --- NEW SHOPPING CART ROUTES ---
 
-// 1. Add item to session-based cart
-app.post('/cart/add', (req, res) => {
+// 1. Add isAuthenticated here to force login when "ADD TO CART" is clicked
+app.post('/cart/add', isAuthenticated, (req, res) => {
     const { gameId, gameTitle } = req.body;
     
     if (!req.session.cart) {
         req.session.cart = [];
     }
 
-    // Check if game is already in cart to prevent duplicates in session
     const exists = req.session.cart.find(item => item.id === gameId);
     if (!exists) {
         req.session.cart.push({ id: gameId, title: gameTitle });
@@ -167,8 +178,8 @@ app.post('/cart/add', (req, res) => {
     res.redirect('/store?added=' + encodeURIComponent(gameTitle));
 });
 
-// 2. Render the Cart page
-app.get('/cart', (req, res) => {
+// 2. Add isAuthenticated here so guests can't view an empty cart page
+app.get('/cart', isAuthenticated, (req, res) => {
     const cart = req.session.cart || [];
     res.render('cart', { cart: cart, user: req.session.user });
 });
@@ -216,27 +227,80 @@ app.post('/checkout', isAuthenticated, async (req, res) => {
     }
 });
 
+// --- UPDATED: Main Community Hub ---
 app.get('/community', async (req, res) => {
     try {
-        // Use LEFT JOIN to ensure the page loads even if data is slightly mismatched
-        const query = `
-            SELECT reviews.*, users.username, games.title 
-            FROM reviews
-            LEFT JOIN users ON reviews.user_id = users.user_id
-            LEFT JOIN games ON reviews.game_id = games.game_id
-            ORDER BY reviews.created_at DESC
-        `;
-        const [recentReviews] = await db.query(query);
-
+        const [games] = await db.query('SELECT * FROM games');
         res.render('community', { 
-            reviews: recentReviews,
+            games: games, 
             user: req.session.user,
-            cart: req.session.cart 
+            cart: req.session.cart || [] // Add this line
         });
     } catch (err) {
-        // Log the SPECIFIC error to the terminal so we can see what's wrong
-        console.error("SQL Error in Community:", err);
-        res.status(500).send("Could not load community feed. Check terminal for error.");
+        console.error("Community Hub Error:", err);
+        res.status(500).send("Error loading community hub.");
+    }
+});
+
+// --- NEW: Individual Game Community Page ---
+app.get('/community/:id', async (req, res) => {
+    const gameId = req.params.id;
+    try {
+        const [gameResult] = await db.query('SELECT * FROM games WHERE game_id = ?', [gameId]);
+        if (gameResult.length === 0) return res.status(404).send("Game not found.");
+
+        const discussionsQuery = `
+            SELECT discussions.*, users.username 
+            FROM discussions 
+            JOIN users ON discussions.user_id = users.user_id 
+            WHERE discussions.game_id = ? 
+            ORDER BY created_at DESC`;
+        const [discussions] = await db.query(discussionsQuery, [gameId]);
+
+        res.render('game_community', { 
+            game: gameResult[0], 
+            discussions: discussions,
+            user: req.session.user,
+            cart: req.session.cart || [] // Add this line
+        });
+    } catch (err) {
+        console.error("Game Community Error:", err);
+        res.status(500).send("Database error.");
+    }
+});
+
+// --- NEW: Create Discussion Page (GET) ---
+// Note: isAuthenticated is reused from existing code
+app.get('/discussion/create/:gameId', isAuthenticated, async (req, res) => {
+    const gameId = req.params.gameId;
+    try {
+        const [game] = await db.query('SELECT * FROM games WHERE game_id = ?', [gameId]);
+        res.render('create_discussion', { 
+            game: game[0], 
+            user: req.session.user,
+            cart: req.session.cart || [] // Add this line
+        });
+    } catch (err) {
+        res.status(500).send("Error loading creation form.");
+    }
+});
+
+// --- NEW: Handle Discussion Submission (POST) ---
+app.post('/discussion/create', isAuthenticated, async (req, res) => {
+    const { gameId, title, comment } = req.body;
+    const userId = req.session.user_id; // Assuming you store user_id in session
+    
+    if (!title || !comment) {
+        return res.status(400).send("Title and comment are required.");
+    }
+
+    try {
+        const query = 'INSERT INTO discussions (game_id, user_id, title, comment) VALUES (?, ?, ?, ?)';
+        await db.query(query, [gameId, userId, title, comment]);
+        res.redirect('/community/' + gameId);
+    } catch (err) {
+        console.error("Discussion Post Error:", err);
+        res.status(500).send("Error submitting discussion.");
     }
 });
 

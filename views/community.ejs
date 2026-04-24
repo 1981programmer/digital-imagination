@@ -1,22 +1,38 @@
-<%- include('partials/navbar') %>
-<div class="container">
-    <h1>Community Activity</h1>
-    <hr>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/navbar') %>
+    <title>Community Hub - Digital Imagination</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .community-container { width: 80%; margin: 50px auto; color: white; }
+        .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; margin-top: 30px; }
+        .game-card { background: #16202d; padding: 15px; border-radius: 5px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: transform 0.2s; }
+        .game-card:hover { transform: translateY(-5px); }
+        .game-card img { width: 100%; height: 250px; object-fit: cover; border-radius: 4px; margin-bottom: 15px; }
+        .community-link { color: #66c0f4; text-decoration: none; font-weight: bold; font-size: 1.1em; }
+        .community-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body style="background-color: #1b2838;">
+    <div class="community-container">
+        <h1>Digital Imagination Community Hub</h1>
+        <p class="lead">Connect with other gamers. Select a game to view its discussion board.</p>
+        <hr style="border-color: #333;">
 
-    <% if (reviews.length === 0) { %>
-        <p>No reviews yet. Be the first to share your thoughts!</p>
-    <% } else { %>
-        <div class="review-feed">
-            <% reviews.forEach(review => { %>
-                <div class="game-card" style="flex-direction: column;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <strong><%= review.username %></strong>
-                        <span style="color: #66c0f4;"><%= review.rating %>/6 Stars</span>
-                    </div>
-                    <p style="font-style: italic; color: #c7d5e0;">Reviewing: <%= review.title %></p>
-                    <p><%= review.comment %></p>
+        <div class="game-grid">
+            <% games.forEach(game => { %>
+                <div class="game-card">
+                    <a href="/community/<%= game.game_id %>">
+                        <img src="<%= game.image_url %>" alt="<%= game.title %>">
+                    </a>
+
+                    <a href="/community/<%= game.game_id %>" class="community-link">
+                        <%= game.title %> Community
+                    </a>
                 </div>
-            <% }) %>
+            <% }); %>
         </div>
-    <% } %>
-</div>
+    </div>
+</body>
+</html>

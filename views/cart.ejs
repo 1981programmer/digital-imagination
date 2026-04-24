@@ -25,7 +25,7 @@
     <%- include('partials/navbar') %>
 
     <div class="container">
-        <h1><%= user %>'s Shopping Cart</h1>
+        <h1><%= user ? user + "'s" : "Your" %> Shopping Cart</h1>
         <hr>
 
         <% if (cart.length === 0) { %>

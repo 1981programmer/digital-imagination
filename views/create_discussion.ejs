@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/navbar') %>
+    <title>Create Discussion - <%= game.title %></title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .form-container { width: 50%; margin: 50px auto; color: white; background: #16202d; padding: 30px; border-radius: 5px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group textarea { width: 100%; padding: 10px; background: #1b2838; border: 1px solid #333; color: white; border-radius: 3px; }
+        .form-group textarea { height: 150px; }
+        .btn-submit { background: #47b230; color: white; border: none; padding: 10px 20px; border-radius: 2px; cursor: pointer; font-weight: bold; }
+        .btn-submit:hover { background: #5a7f28; }
+    </style>
+</head>
+<body style="background-color: #1b2838;">
+    <div class="form-container">
+        <h1>Start a new Discussion</h1>
+        <p style="color: #888;">For: <strong style="color: #fff;"><%= game.title %></strong></p>
+        <hr style="border-color: #333;">
+        <br>
+        <form action="/discussion/create" method="POST">
+            <input type="hidden" name="gameId" value="<%= game.game_id %>">
+            
+            <div class="form-group">
+                <label>Discussion Title (Question or Opinion)</label>
+                <input type="text" name="title" required placeholder="What's your question or thought?">
+            </div>
+
+            <div class="form-group">
+                <label>Additional Information</label>
+                <textarea name="comment" required placeholder="Give some more context or details..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">Submit Discussion</button>
+            <a href="/community/<%= game.game_id %>" style="color: #888; text-decoration: none; margin-left: 20px;">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>

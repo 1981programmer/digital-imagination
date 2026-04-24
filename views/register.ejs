@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini-Steam | Create Account</title>
+    <title>Digital Imagination | Create Account</title>
     <link rel="stylesheet" href="/css/style.css"> </head>
 <body class="steam-theme">
     <%- include('partials/navbar') %>
@@ -11,34 +11,34 @@
     <div class="auth-container">
         <div class="auth-box">
             <h1>CREATE YOUR ACCOUNT</h1>
-            <p class="subtitle">Join the Mini-Steam community to start building your library.</p>
+            <p class="subtitle">Join the Digital Imagination community to start building your library.</p>
 
-            <form action="/register" method="POST" class="registration-form">
+            <form action="/register" method="POST" class="registration-form" autocomplete="off">
                 <div class="form-group">
                     <label for="username">Account Name</label>
-                    <input type="text" id="username" name="username" required minlength="3">
+                    <input type="text" id="username" name="username" required minlength="3" autocomplete="off">
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email Address</label>
-                    <input type="email" id="email" name="email" required>
+                    <input type="email" id="email" name="email" required autocomplete="off">
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required minlength="8">
+                    <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password">
                 </div>
 
                 <div class="form-group">
                     <label for="confirmPassword">Confirm Password</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="new-password">
                 </div>
 
                 <button type="submit" class="btn-steam-blue">Complete Sign-up</button>
             </form>
 
             <div class="auth-footer">
-                <p>Already have a Mini-Steam account? <a href="/login">Sign in</a></p>
+                <p>Already have a Digital Imagination account? <a href="/login" style="color: #39FF14;">Sign in</a></p>
             </div>
         </div>
     </div>

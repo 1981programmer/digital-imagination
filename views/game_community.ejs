@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/navbar') %>
+    <title><%= game.title %> Community - Digital Imagination</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .game-container { width: 80%; margin: 50px auto; color: white; }
+        .game-header { display: flex; gap: 30px; align-items: center; margin-bottom: 30px; }
+        .game-header img { width: 150px; border-radius: 5px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .discussion-list { margin-top: 30px; }
+        .discussion-item { background: #16202d; padding: 20px; margin-bottom: 15px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+        .discussion-title { color: #fff; font-size: 1.2em; text-decoration: none; font-weight: bold; }
+        .discussion-title:hover { color: #66c0f4; }
+        .discussion-meta { color: #888; font-size: 0.9em; }
+        .btn-create { background: #4c6b22; color: #a3cf06; border: 1px solid #a3cf06; padding: 10px 20px; border-radius: 3px; cursor: pointer; text-decoration: none; font-weight: bold; float: right; }
+        .btn-create:hover { background: #5a7f28; }
+    </style>
+</head>
+<body style="background-color: #1b2838;">
+    <div class="game-container">
+        <a href="/community" style="color: #66c0f4; text-decoration: none; float: right;">&larr; Back to Community Hub</a>
+        <div class="game-header">
+            <img src="<%= game.image_url %>" alt="<%= game.title %>">
+            <div>
+                <h1><%= game.title %> Discussion Board</h1>
+                <p>Welcome to the official community for <%= game.title %>! Feel free to ask questions or share your thoughts.</p>
+            </div>
+        </div>
+
+        <% if (user) { %>
+            <a href="/discussion/create/<%= game.game_id %>" class="btn-create">Create Discussion</a>
+        <% } else { %>
+            <a href="/login" class="btn-create" style="background: #2a475e; color: #66c0f4; border-color: #66c0f4;">
+                Login to Start a Discussion
+            </a>
+        <% } %>
+        <div style="clear: both;"></div>
+
+        <div class="discussion-list">
+            <% if (discussions.length > 0) { %>
+                <% discussions.forEach(disc => { %>
+                    <div class="discussion-item">
+                        <div>
+                            <a href="#" class="discussion-title"><%= disc.title %></a>
+                            <div class="discussion-meta">
+                                Posted by <%= disc.username %> on <%= new Date(disc.created_at).toLocaleDateString() %>
+                            </div>
+                        </div>
+                        </div>
+                <% }); %>
+            <% } else { %>
+                <div style="text-align: center; color: #888; margin-top: 50px;">
+                    <h3>No discussions have been started for <%= game.title %> yet.</h3>
+                    <p>Be the first to share your opinion!</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>
