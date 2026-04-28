@@ -37,7 +37,7 @@ function isAuthenticated(req, res, next) {
 
 app.get('/register', (req, res) => {
     res.render('register', { 
-        user: req.session.user,      // Added this to fix the ReferenceError
+        user: req.session.user,      
         cart: req.session.cart || [] 
     });
 });
@@ -62,7 +62,7 @@ app.post('/register', async (req, res) => {
 
 app.get('/login', (req, res) => {
     res.render('login', { 
-        user: req.session.user,      // Added this for consistency
+        user: req.session.user,      
         cart: req.session.cart || [] 
     });
 });
@@ -74,7 +74,6 @@ app.post('/login', async (req, res) => {
         if (users.length === 0) return res.send('Invalid username or password.');
         const isMatch = await bcrypt.compare(password, users[0].password);
         if (isMatch) {
-            // FIX: Save BOTH the username and the user_id to the session
             req.session.user = users[0].username;
             req.session.user_id = users[0].user_id; 
             res.redirect('/library');
@@ -93,23 +92,17 @@ app.get('/logout', (req, res) => {
 
 // --- STORE & LIBRARY ROUTES ---
 
-// --- NEW HOME PAGE ROUTE ---
 app.get('/', (req, res) => {
     res.render('home', { 
         user: req.session.user, 
-        cart: req.session.cart || [] // Prevents home page navbar crashes
+        cart: req.session.cart || [] 
     });
 });
 
-// --- UPDATED STORE ROUTE (Moved to /store) ---
 app.get('/store', async (req, res) => {
     const currentUser = req.session.user || ''; 
     const added = req.query.added; 
 
-    // This query does three things: 
-    // 1. Gets all game data (including image_url)
-    // 2. Checks if the logged-in user already owns the game
-    // 3. Calculates the average community rating
     const query = `
         SELECT games.*, 
                user_libraries.library_id, 
@@ -137,7 +130,7 @@ app.get('/store', async (req, res) => {
 
 app.get('/library', isAuthenticated, async (req, res) => {
     const username = req.session.user;
-    const message = req.query.message; // Capture the "ReviewSubmitted" message
+    const message = req.query.message; 
     try {
         const query = `
             SELECT games.*, reviews.review_id 
@@ -153,16 +146,13 @@ app.get('/library', isAuthenticated, async (req, res) => {
             games: userGames, 
             user: req.session.user, 
             cart: req.session.cart,
-            message: message // Pass the message to the EJS template
+            message: message 
         });
     } catch (err) {
         res.status(500).send("Could not load your library.");
     }
 });
 
-// --- NEW SHOPPING CART ROUTES ---
-
-// 1. Add isAuthenticated here to force login when "ADD TO CART" is clicked
 app.post('/cart/add', isAuthenticated, (req, res) => {
     const { gameId, gameTitle } = req.body;
     
@@ -178,25 +168,21 @@ app.post('/cart/add', isAuthenticated, (req, res) => {
     res.redirect('/store?added=' + encodeURIComponent(gameTitle));
 });
 
-// 2. Add isAuthenticated here so guests can't view an empty cart page
 app.get('/cart', isAuthenticated, (req, res) => {
     const cart = req.session.cart || [];
     res.render('cart', { cart: cart, user: req.session.user });
 });
 
-// Add this route to your app.js to handle the deletion
 app.get('/cart/remove/:gameId', (req, res) => {
     const gameIdToRemove = req.params.gameId;
 
     if (req.session.cart) {
-        // We filter out the game that matches the ID passed in the URL
         req.session.cart = req.session.cart.filter(item => item.id != gameIdToRemove);
     }
 
-    res.redirect('/cart'); // Send them back to the cart to see it's gone
+    res.redirect('/cart'); 
 });
 
-// 3. Checkout: Move games from Session Cart to AWS RDS
 app.post('/checkout', isAuthenticated, async (req, res) => {
     const cart = req.session.cart;
     const username = req.session.user;
@@ -209,7 +195,6 @@ app.post('/checkout', isAuthenticated, async (req, res) => {
         const [userResult] = await db.query('SELECT user_id FROM users WHERE username = ?', [username]);
         const userId = userResult[0].user_id;
 
-        // Loop through the cart and save each game to RDS
         for (const item of cart) {
             await db.query(
                 'INSERT IGNORE INTO user_libraries (user_id, game_id) VALUES (?, ?)',
@@ -217,7 +202,6 @@ app.post('/checkout', isAuthenticated, async (req, res) => {
             );
         }
 
-        // Clear cart after successful transaction
         req.session.cart = [];
         res.redirect('/library');
 
@@ -227,14 +211,13 @@ app.post('/checkout', isAuthenticated, async (req, res) => {
     }
 });
 
-// --- UPDATED: Main Community Hub ---
 app.get('/community', async (req, res) => {
     try {
         const [games] = await db.query('SELECT * FROM games');
         res.render('community', { 
             games: games, 
             user: req.session.user,
-            cart: req.session.cart || [] // Add this line
+            cart: req.session.cart || [] 
         });
     } catch (err) {
         console.error("Community Hub Error:", err);
@@ -242,7 +225,6 @@ app.get('/community', async (req, res) => {
     }
 });
 
-// --- NEW: Individual Game Community Page ---
 app.get('/community/:id', async (req, res) => {
     const gameId = req.params.id;
     try {
@@ -261,7 +243,7 @@ app.get('/community/:id', async (req, res) => {
             game: gameResult[0], 
             discussions: discussions,
             user: req.session.user,
-            cart: req.session.cart || [] // Add this line
+            cart: req.session.cart || [] 
         });
     } catch (err) {
         console.error("Game Community Error:", err);
@@ -269,8 +251,6 @@ app.get('/community/:id', async (req, res) => {
     }
 });
 
-// --- NEW: Create Discussion Page (GET) ---
-// Note: isAuthenticated is reused from existing code
 app.get('/discussion/create/:gameId', isAuthenticated, async (req, res) => {
     const gameId = req.params.gameId;
     try {
@@ -278,17 +258,16 @@ app.get('/discussion/create/:gameId', isAuthenticated, async (req, res) => {
         res.render('create_discussion', { 
             game: game[0], 
             user: req.session.user,
-            cart: req.session.cart || [] // Add this line
+            cart: req.session.cart || [] 
         });
     } catch (err) {
         res.status(500).send("Error loading creation form.");
     }
 });
 
-// --- NEW: Handle Discussion Submission (POST) ---
 app.post('/discussion/create', isAuthenticated, async (req, res) => {
     const { gameId, title, comment } = req.body;
-    const userId = req.session.user_id; // Assuming you store user_id in session
+    const userId = req.session.user_id; 
     
     if (!title || !comment) {
         return res.status(400).send("Title and comment are required.");
@@ -342,7 +321,6 @@ app.post('/review/submit', isAuthenticated, async (req, res) => {
             );
         }
 
-        // REDIRECT back to library with a "message" parameter in the URL
         res.redirect('/library?message=ReviewSubmitted');
     } catch (err) {
         console.error(err);
@@ -350,19 +328,16 @@ app.post('/review/submit', isAuthenticated, async (req, res) => {
     }
 });
 
-// To handle the "Read Reviews" link
 app.get('/game/:id', async (req, res) => {
     const gameId = req.params.id;
     
     try {
-        // 1. Get specific game details
         const [gameResult] = await db.query('SELECT * FROM games WHERE game_id = ?', [gameId]);
         
         if (gameResult.length === 0) {
             return res.status(404).send("Game not found.");
         }
 
-        // 2. Get all reviews for this specific game
         const reviewsQuery = `
             SELECT reviews.*, users.username 
             FROM reviews 
@@ -371,7 +346,6 @@ app.get('/game/:id', async (req, res) => {
             ORDER BY created_at DESC`;
         const [reviews] = await db.query(reviewsQuery, [gameId]);
 
-        // 3. Render the detailed view (Make sure game.ejs exists in /views)
         res.render('game_review', { 
             game: gameResult[0], 
             reviews: reviews,
@@ -381,6 +355,92 @@ app.get('/game/:id', async (req, res) => {
     } catch (err) {
         console.error("Error loading game details:", err);
         res.status(500).send("Database error.");
+    }
+});
+
+// --- UPDATED GET ROUTE FOR NESTED REPLIES ---
+app.get('/discussion/:id', async (req, res) => {
+    const discussionId = req.params.id;
+
+    try {
+        const [discussion] = await db.query(`
+            SELECT d.*, u.username 
+            FROM discussions d
+            JOIN users u ON d.user_id = u.user_id
+            WHERE d.discussion_id = ?
+        `, [discussionId]);
+
+        if (discussion.length === 0) {
+            return res.status(404).send('Discussion not found');
+        }
+
+        const [replies] = await db.query(`
+            SELECT r.*, u.username 
+            FROM replies r
+            JOIN users u ON r.user_id = u.user_id
+            WHERE r.discussion_id = ?
+            ORDER BY r.created_at ASC
+        `, [discussionId]);
+
+        // Build the "Tree" of nested replies in Node.js
+        const replyMap = {};
+        const topLevelReplies = [];
+
+        // 1. Give every reply an empty children array
+        replies.forEach(reply => {
+            reply.children = [];
+            replyMap[reply.reply_id] = reply;
+        });
+
+        // 2. Loop again to organize them
+        replies.forEach(reply => {
+            if (reply.parent_reply_id) {
+                // If it has a parent, push it into the parent's children array
+                if (replyMap[reply.parent_reply_id]) {
+                    replyMap[reply.parent_reply_id].children.push(reply);
+                }
+            } else {
+                // If it has no parent, it's a top-level reply
+                topLevelReplies.push(reply);
+            }
+        });
+
+        res.render('discussion_thread', { 
+            discussion: discussion[0], 
+            replies: topLevelReplies,  // Pass the nested tree instead of the flat list
+            user: req.session.user,
+            cart: req.session.cart || []
+        });
+
+    } catch (error) {
+        console.error("Error fetching discussion:", error);
+        res.status(500).send("Internal Server Error");
+    }
+});
+
+// --- UPDATED POST ROUTE FOR NESTED REPLIES ---
+app.post('/discussion/:id/reply', async (req, res) => {
+    const discussionId = req.params.id;
+    const replyContent = req.body.content;
+    const parentReplyId = req.body.parent_reply_id || null; // Capture parent_reply_id from form
+    
+    const userId = req.session.user_id; 
+
+    if (!userId) {
+        return res.status(401).send('You must be logged in to reply.');
+    }
+
+    try {
+        await db.query(`
+            INSERT INTO replies (discussion_id, user_id, content, parent_reply_id) 
+            VALUES (?, ?, ?, ?)
+        `, [discussionId, userId, replyContent, parentReplyId]);
+
+        res.redirect(`/discussion/${discussionId}`);
+
+    } catch (error) {
+        console.error("Error posting reply:", error);
+        res.status(500).send("Internal Server Error");
     }
 });
 

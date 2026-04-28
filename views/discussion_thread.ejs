@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= discussion.title %> - Digital Imagination</title>
+    <%- include('partials/navbar') %> <!-- Re-using your navbar if applicable -->
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .thread-container { max-width: 800px; margin: 40px auto; padding: 20px; background: #1b2838; border-radius: 8px; color: white;}
+        .main-post { background-color: #16202d; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
+        .post-meta { font-size: 0.9em; color: #888; margin-bottom: 15px; }
+        
+        .reply-box { border-left: 2px solid #66c0f4; padding-left: 15px; margin-top: 15px; margin-bottom: 15px; }
+        .reply-content { margin-top: 5px; }
+        
+        .btn-toggle-reply { background: none; border: none; color: #66c0f4; cursor: pointer; padding: 0; font-size: 0.9em; font-weight: bold; }
+        .btn-toggle-reply:hover { text-decoration: underline; }
+        
+        .hidden-form { display: none; margin-top: 10px; }
+        textarea { width: 100%; padding: 10px; border-radius: 4px; background: #2a475e; color: white; border: none; margin-bottom: 10px; }
+        
+        .btn-submit { background-color: #4c6b22; color: #a3cf06; border: none; padding: 8px 15px; border-radius: 3px; cursor: pointer; font-weight: bold; }
+        .btn-submit:hover { background-color: #5a7f28; }
+    </style>
+</head>
+<body style="background-color: #171a21;">
+    <div class="thread-container">
+        
+        <a href="/community/<%= discussion.game_id %>" style="color: #66c0f4; text-decoration: none;">&larr; Back to Game Community</a>
+        
+        <!-- 1. The Original Post -->
+        <section class="main-post" style="margin-top: 20px;">
+            <h1 style="margin-top: 0;"><%= discussion.title %></h1>
+            <div class="post-meta">
+                Posted by <strong><%= discussion.username %></strong> | <%= new Date(discussion.created_at).toLocaleString() %>
+            </div>
+            <p style="font-size: 1.1em; line-height: 1.5;"><%= discussion.comment %></p>
+        </section>
+
+        <hr style="border: 1px solid #2a475e; margin: 30px 0;">
+
+        <!-- 2. The Nested Replies Tree -->
+        <section>
+            <h2>Replies</h2>
+            
+            <% 
+            // This is the recursive function that draws the tree!
+            function renderReplies(replyList) { 
+                if (!replyList || replyList.length === 0) return;
+                replyList.forEach(reply => { 
+            %>
+                <div class="reply-box">
+                    <div class="post-meta" style="margin-bottom: 5px;">
+                        <strong style="color: #fff;"><%= reply.username %></strong> &bull; <%= new Date(reply.created_at).toLocaleString() %>
+                    </div>
+                    <p class="reply-content"><%= reply.content %></p>
+                    
+                    <% if (user) { %>
+                        <!-- The Reply Button to open the nested form -->
+                        <button class="btn-toggle-reply" onclick="toggleForm('form-<%= reply.reply_id %>')">Reply to <%= reply.username %></button>
+                        
+                        <!-- The Hidden Form (passes the parent_reply_id) -->
+                        <form id="form-<%= reply.reply_id %>" class="hidden-form" action="/discussion/<%= discussion.discussion_id %>/reply" method="POST">
+                            <input type="hidden" name="parent_reply_id" value="<%= reply.reply_id %>">
+                            <textarea name="content" required placeholder="Write a reply..." rows="3"></textarea>
+                            <button type="submit" class="btn-submit">Post Nested Reply</button>
+                        </form>
+                    <% } %>
+
+                    <!-- Recursively call THIS SAME FUNCTION to draw the children! -->
+                    <% if (reply.children && reply.children.length > 0) { %>
+                        <div style="margin-left: 20px;">
+                            <% renderReplies(reply.children) %>
+                        </div>
+                    <% } %>
+                </div>
+            <% 
+                });
+            } 
+            %>
+
+            <!-- Initial call to start the loop with top-level replies -->
+            <% if (replies.length > 0) { %>
+                <% renderReplies(replies) %>
+            <% } else { %>
+                <p style="color: #888;">No replies yet. Be the first to share your thoughts!</p>
+            <% } %>
+
+        </section>
+
+        <hr style="border: 1px solid #2a475e; margin: 30px 0;">
+
+        <!-- 3. Top-Level Reply Form (For replying directly to the main post) -->
+        <section>
+            <h3>Leave a Reply to Main Post</h3>
+            <% if (user) { %>
+                <form action="/discussion/<%= discussion.discussion_id %>/reply" method="POST">
+                    <textarea name="content" required placeholder="Write your reply here..." rows="4"></textarea>
+                    <br>
+                    <button type="submit" class="btn-submit">Post Reply</button>
+                </form>
+            <% } else { %>
+                <div style="background-color: #2a475e; padding: 15px; border-radius: 4px; text-align: center;">
+                    <p style="margin: 0;">You must be <a href="/login" style="color: #66c0f4; font-weight: bold;">logged in</a> to leave a reply.</p>
+                </div>
+            <% } %>
+        </section>
+    </div>
+
+    <!-- The JavaScript to make the hidden nested forms open and close -->
+    <script>
+        function toggleForm(formId) {
+            const form = document.getElementById(formId);
+            if (form.style.display === "none" || form.style.display === "") {
+                form.style.display = "block";
+            } else {
+                form.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>

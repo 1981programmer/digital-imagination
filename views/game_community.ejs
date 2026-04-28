@@ -42,12 +42,13 @@
                 <% discussions.forEach(disc => { %>
                     <div class="discussion-item">
                         <div>
-                            <a href="#" class="discussion-title"><%= disc.title %></a>
+                            <!-- FIX: Changed 'discussion.discussion_id' to 'disc.discussion_id' and added the title class -->
+                            <a href="/discussion/<%= disc.discussion_id %>" class="discussion-title"><%= disc.title %></a>
                             <div class="discussion-meta">
                                 Posted by <%= disc.username %> on <%= new Date(disc.created_at).toLocaleDateString() %>
                             </div>
                         </div>
-                        </div>
+                    </div>
                 <% }); %>
             <% } else { %>
                 <div style="text-align: center; color: #888; margin-top: 50px;">
